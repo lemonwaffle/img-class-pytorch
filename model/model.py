@@ -1,5 +1,7 @@
+import pretrainedmodels
 import torch.nn as nn
 import torch.nn.functional as F
+
 from base import BaseModel
 
 
@@ -20,3 +22,51 @@ class MnistModel(BaseModel):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+class ConvNet(BaseModel):
+    """Generic convnet image classification model. 
+
+    Uses pretrainedmodels from Cadene: https://github.com/Cadene/pretrained-models.pytorch
+    """
+
+    def __init__(self,
+                 arch: str,
+                 num_classes: int,
+                 pretrained: bool = True,
+                 freeze: bool = False,
+                 ) -> None:
+        """Initializes an image classification model.
+        
+        Parameters
+        ----------
+        arch : str
+            Name of architecture.
+        num_classes : int
+            Number of classes to classify.
+        pretrained : bool, optional
+            Whether to use imagenet weights, by default True
+        freeze : bool, optional
+            Whether to freeze base arch (except final classifier layer), 
+            by default False
+        """
+
+        super().__init__()
+
+        # Initialize base architecture
+        self.model = pretrainedmodels.__dict__[arch](
+            pretrained='imagenet' if pretrained else None
+        )
+
+        # Freeze model (except for final classifier layer)
+        if freeze:
+            for params in self.model.parameters():
+                params.requires_grad = False
+
+        # Replace classifier layer
+        self.model.last_linear = nn.Linear(
+            self.model.last_linear.in_features, num_classes
+        )
+
+    def forward(self, x):
+        return self.model(x)

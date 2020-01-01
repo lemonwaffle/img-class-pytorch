@@ -1,3 +1,10 @@
+"""BaseDataLoader is a subclass of torch.utils.data.DataLoader, you can use either of them.
+
+BaseDataLoader helps to handle:
+- Data shuffling
+- Generating validation data loader by calling BaseDataLoader.split_validation()
+"""
+
 import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data.dataloader import default_collate

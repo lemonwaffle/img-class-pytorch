@@ -1,23 +1,18 @@
 {
-    "name": "img_class",
+    "name": "Mnist_LeNet",
     "n_gpu": 1,
 
     "arch": {
-        "type": "ConvNet",
-        "args": {
-            "arch": "resnet18",
-            "num_classes": 10,
-            "pretrained": true,
-            "freeze": false
-        }
+        "type": "MnistModel",
+        "args": {}
     },
     "data_loader": {
-        "type": "FolderDataLoader",
+        "type": "MnistDataLoader",
         "args":{
-            "data_dir": "data/imagenette2",
-            "img_size": 224,
+            "data_dir": "data/",
             "batch_size": 128,
             "shuffle": true,
+            "validation_split": 0.1,
             "num_workers": 2
         }
     },
@@ -29,7 +24,7 @@
             "amsgrad": true
         }
     },
-    "loss": "cross_entropy",
+    "loss": "nll_loss",
     "metrics": [
         "accuracy", "top_k_acc"
     ],
@@ -50,6 +45,6 @@
         "monitor": "min val_loss",
         "early_stop": 10,
 
-        "tensorboard": false 
+        "tensorboard": true
     }
 }
