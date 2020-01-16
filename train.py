@@ -19,7 +19,7 @@ torch.backends.cudnn.deterministic = True
 
 
 def get_args():
-    parent_parser = ArgumentParser()
+    parent_parser = ArgumentParser(add_help=False)
 
     # GPU args
     parent_parser.add_argument(
@@ -36,7 +36,7 @@ def get_args():
         type=str,
         default="dp",
         choices=("dp", "ddp", "ddp2"),
-        help="Supports three options dp, ddp, ddp2, default is dp",
+        help="Supports three options None, dp, ddp, ddp2, default is dp",
     )
 
     parent_parser.add_argument(

@@ -64,7 +64,7 @@ class ImgClassModule(pl.LightningModule):
         # Replace classifier layer
         # TODO: Add option to stack more layers
         self.model.last_linear = nn.Linear(
-            self.model.last_linear.in_features * 2, self.data_loader.num_classes
+            self.model.last_linear.in_features * 2, self.data_loader.n_classes
         )
 
     def forward(self, x):
@@ -147,7 +147,7 @@ class ImgClassModule(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser, root_dir):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(parents=[parent_parser])
         # parser = HyperOptArgumentParser(
         #     strategy=parent_parser.strategy, parents=[parent_parser]
         # )
