@@ -1,66 +1,91 @@
-import argparse
-import collections
-import torch
+"""Training script."""
+
+import os
+import random
+from argparse import ArgumentParser
+
 import numpy as np
-import data_loader.data_loaders as module_data
-import model.loss as module_loss
-import model.metric as module_metric
-import model.model as module_arch
-from parse_config import ConfigParser
-from trainer import Trainer
+import torch
+from pytorch_lightning import Trainer
+
+from modules.img_class_module import ImgClassModule
 
 
-# fix random seeds for reproducibility
-SEED = 123
+SEED = 2334
 torch.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
+random.seed(SEED)
 np.random.seed(SEED)
-
-def main(config):
-    logger = config.get_logger('train')
-
-    # setup data_loader instances
-    data_loader = config.init_obj('data_loader', module_data)
-    valid_data_loader = data_loader.split_validation()
-
-    # build model architecture, then print to console
-    model = config.init_obj('arch', module_arch)
-    logger.info(model)
-
-    # get function handles of loss and metrics
-    criterion = getattr(module_loss, config['loss'])
-    metrics = [getattr(module_metric, met) for met in config['metrics']]
-
-    # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
-    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
-
-    lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
-
-    trainer = Trainer(model, criterion, metrics, optimizer,
-                      config=config,
-                      data_loader=data_loader,
-                      valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
-
-    trainer.train()
+torch.backends.cudnn.deterministic = True
 
 
-if __name__ == '__main__':
-    args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default=None, type=str,
-                      help='config file path (default: None)')
-    args.add_argument('-r', '--resume', default=None, type=str,
-                      help='path to latest checkpoint (default: None)')
-    args.add_argument('-d', '--device', default=None, type=str,
-                      help='indices of GPUs to enable (default: all)')
+def get_args():
+    parent_parser = ArgumentParser()
 
-    # custom cli options to modify configuration from default values given in json file.
-    CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
-    options = [
-        CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),
-        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
-    ]
-    config = ConfigParser.from_args(args, options)
-    main(config)
+    # GPU args
+    parent_parser.add_argument("--gpus", type=int, default=1, help="How many gpus")
+    parent_parser.add_argument(
+        "--use_16bit",
+        dest="use_16bit",
+        action="store_true",
+        help="Whether to use 16 bit precision",
+    )
+    parent_parser.add_argument(
+        "--distributed-backend",
+        type=str,
+        default="dp",
+        choices=("dp", "ddp", "ddp2"),
+        help="Supports three options dp, ddp, ddp2",
+    )
+
+    parent_parser.add_argument(
+        "--save-path", default="saved", type=str, help="Path to save output"
+    )
+    parent_parser.add_argument(
+        "--evaluate",
+        dest="evaluate",
+        action="store_true",
+        help="Evaluate model on validation set",
+    )
+
+    parent_parser.add_argument(
+        "--checkpoint-model-dir",
+        type=str,
+        default=None,
+        help="path to folder where checkpoints of trained models will be saved",
+    )
+    parent_parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        default=2000,
+        help="number of batches after which a checkpoint of the trained model will be created",
+    )
+
+    # Add model specific args
+    parser = ImgClassModule.add_model_specific_args(parent_parser, os.getcwd())
+
+    return parser.parse_args()
+
+
+def get_callbacks():
+    pass
+
+
+def main(hparams):
+    model = ImgClassModule(hparams)
+
+    trainer = Trainer(
+        default_save_path=hparams.save_path,
+        gpus=hparams.gpus,
+        max_epochs=hparams.epochs,
+        distributed_backend=hparams.distributed_backend,
+        use_amp=hparams.use_16bit,
+    )
+
+    if hparams.evaluate:
+        trainer.run_evaluation()
+    else:
+        trainer.fit(model)
+
+
+if __name__ == "__main__":
+    main(get_args())
