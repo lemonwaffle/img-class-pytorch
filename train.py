@@ -68,7 +68,7 @@ def main(hparams):
     trainer = Trainer(
         default_save_path=hparams.save_path,
         gpus=hparams.gpus,
-        max_epochs=hparams.epochs,
+        max_nb_epochs=hparams.epochs,
         distributed_backend=hparams.distributed_backend,
         use_amp=hparams.use_16bit,
     )
