@@ -22,7 +22,9 @@ def get_args():
     parent_parser = ArgumentParser()
 
     # GPU args
-    parent_parser.add_argument("--gpus", type=int, default=1, help="How many gpus")
+    parent_parser.add_argument(
+        "--gpus", type=int, default=1, help="How many gpus, default is 1"
+    )
     parent_parser.add_argument(
         "--use_16bit",
         dest="use_16bit",
@@ -34,30 +36,20 @@ def get_args():
         type=str,
         default="dp",
         choices=("dp", "ddp", "ddp2"),
-        help="Supports three options dp, ddp, ddp2",
+        help="Supports three options dp, ddp, ddp2, default is dp",
     )
 
     parent_parser.add_argument(
-        "--save-path", default="saved", type=str, help="Path to save output"
+        "--save-path",
+        default="saved",
+        type=str,
+        help="Path to save output, default is saved",
     )
     parent_parser.add_argument(
         "--evaluate",
         dest="evaluate",
         action="store_true",
         help="Evaluate model on validation set",
-    )
-
-    parent_parser.add_argument(
-        "--checkpoint-model-dir",
-        type=str,
-        default=None,
-        help="path to folder where checkpoints of trained models will be saved",
-    )
-    parent_parser.add_argument(
-        "--checkpoint-interval",
-        type=int,
-        default=2000,
-        help="number of batches after which a checkpoint of the trained model will be created",
     )
 
     # Add model specific args

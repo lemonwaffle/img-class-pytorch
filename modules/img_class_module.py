@@ -169,7 +169,10 @@ class ImgClassModule(pl.LightningModule):
             help="Whether to freeze base arch (except final classifier layer)",
         )
         parser.add_argument(
-            "--loss", type=str, default="cross_entropy", help="Name of loss function"
+            "--loss",
+            type=str,
+            default="cross_entropy",
+            help="Name of loss function, default is cross_entropy",
         )
 
         # Dataloading
