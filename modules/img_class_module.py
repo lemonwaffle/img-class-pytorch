@@ -4,7 +4,7 @@ Uses pretrainedmodels from Cadene: https://github.com/Cadene/pretrained-models.p
 """
 
 import logging
-from argparse import Namespace
+from argparse import Namespace, ArgumentParser
 from collections import OrderedDict
 
 import pretrainedmodels
@@ -147,9 +147,10 @@ class ImgClassModule(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser, root_dir):
-        parser = HyperOptArgumentParser(
-            strategy=parent_parser.strategy, parents=[parent_parser]
-        )
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        # parser = HyperOptArgumentParser(
+        #     strategy=parent_parser.strategy, parents=[parent_parser]
+        # )
 
         # Model
         parser.add_argument(
