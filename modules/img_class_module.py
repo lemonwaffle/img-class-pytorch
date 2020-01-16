@@ -33,7 +33,7 @@ class ImgClassModule(pl.LightningModule):
 
         # Set dummy tensor to get a print out of sizes coming into
         # and out of every layer
-        self.example_input_array = torch.rand(10, 3, 224, 224)
+        # self.example_input_array = torch.rand(10, 3, 224, 224)
 
         # Initialize dataloader
         self.data_loader = FolderDataLoader(
@@ -73,7 +73,7 @@ class ImgClassModule(pl.LightningModule):
     def training_step(self, batch, batch_nb):
         x, y = batch
 
-        out = self.foward(x)
+        out = self.forward(x)
         loss = self.loss(out, y)
 
         tqdm_dict = {"train_loss": loss}
@@ -87,7 +87,7 @@ class ImgClassModule(pl.LightningModule):
     def validation_step(self, batch, batch_nb):
         x, y = batch
 
-        out = self.foward(x)
+        out = self.forward(x)
         loss = self.loss(out, y)
 
         # Log example images
@@ -138,12 +138,12 @@ class ImgClassModule(pl.LightningModule):
     @pl.data_loader
     def train_dataloader(self):
         logging.info("Training data loader called")
-        return self.data_loader.get_train_dataloader()
+        return self.data_loader.train_dataloader
 
     @pl.data_loader
     def val_dataloader(self):
         logging.info("Val data loader called")
-        return self.data_loader.get_val_dataloader()
+        return self.data_loader.val_dataloader
 
     @staticmethod
     def add_model_specific_args(parent_parser, root_dir):

@@ -21,6 +21,13 @@ torch.backends.cudnn.deterministic = True
 def get_args():
     parent_parser = ArgumentParser(add_help=False)
 
+    parent_parser.add_argument(
+        "--use_cpu",
+        dest="use_cpu",
+        action="store_true",
+        help="Whether to use cpu",
+    )
+
     # GPU args
     parent_parser.add_argument(
         "--gpus", type=int, default=1, help="How many gpus, default is 1"
@@ -65,13 +72,19 @@ def get_callbacks():
 def main(hparams):
     model = ImgClassModule(hparams)
 
-    trainer = Trainer(
-        default_save_path=hparams.save_path,
-        gpus=hparams.gpus,
-        max_nb_epochs=hparams.epochs,
-        distributed_backend=hparams.distributed_backend,
-        use_amp=hparams.use_16bit,
-    )
+    if hparams.use_cpu:
+        trainer = Trainer(
+            default_save_path=hparams.save_path,
+            max_nb_epochs=hparams.epochs,
+        )
+    else:
+        trainer = Trainer(
+            default_save_path=hparams.save_path,
+            gpus=hparams.gpus,
+            max_nb_epochs=hparams.epochs,
+            distributed_backend=hparams.distributed_backend,
+            use_amp=hparams.use_16bit,
+        )
 
     if hparams.evaluate:
         trainer.run_evaluation()
