@@ -41,8 +41,8 @@ class ImgClassModule(pl.LightningModule):
             img_size=hparams.img_size,
             batch_size=hparams.batch_size,
         )
-        # Initialize loss function
-        self.loss = getattr(losses, hparams.loss)
+        # Initialize loss module
+        self.loss = getattr(losses, hparams.loss)()
 
         self.__build_model()
 
@@ -171,8 +171,8 @@ class ImgClassModule(pl.LightningModule):
         parser.add_argument(
             "--loss",
             type=str,
-            default="cross_entropy",
-            help="Name of loss function, default is cross_entropy",
+            default="CrossEntropyLoss",
+            help="Name of loss function, default is CrossEntropyLoss",
         )
 
         # Dataloading
